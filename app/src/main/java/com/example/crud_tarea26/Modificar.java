@@ -13,52 +13,61 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 
 import androidx.activity.EdgeToEdge;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class Productos extends AppCompatActivity {
+public class Modificar extends AppCompatActivity {
 
+    private EditText txtnombre, txtprecio, txtId;
     private static final int IMAGE_REQUEST = 1;
-    EditText txtNombre, txtPrecio;
-    Spinner spinner;
-    Button btnGuardar, btnListado;
-    ImageView imagen;
+    ImageView imageView;
+    Spinner spcategoria;
     private Uri imagenUri;
+    private String imagen64;
+    ArrayAdapter<String> adaptador;
+    Button btnModificar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_productos);
+        setContentView(R.layout.activity_modificar);
 
-        txtNombre = findViewById(R.id.txtnombre);
-        txtPrecio = findViewById(R.id.txtprecio);
-        imagen = findViewById(R.id.imagen);
-        spinner = findViewById(R.id.spcategoria);
+        txtnombre = findViewById(R.id.txtnombre);
+        txtprecio = findViewById(R.id.txtprecio);
+        imageView = findViewById(R.id.imagen);
+        spcategoria = findViewById(R.id.spcategoria);
+        txtId = findViewById(R.id.textIdM);
 
-        btnGuardar = findViewById(R.id.btnguardar);
-        btnListado = findViewById(R.id.btnListado);
+        btnModificar = findViewById(R.id.btnModificar);
+
+        txtId.setEnabled(false);
 
         llenarSpinner();
+        llenarDatos();
+        // Me quede despierto contigo porque me enc
+        imageView.setOnClickListener(v -> seleccionarImagen());
 
+    }
 
-        imagen.setOnClickListener(v -> seleccionarImagen());
+    private void llenarDatos(){
+        Intent previousIntent = getIntent();
+        String idProducto = previousIntent.getStringExtra("Id");
+        String nombreProducto = previousIntent.getStringExtra("Nombre");
+        String precioProducto = previousIntent.getStringExtra("Precio");
+        String categoriaProducto = previousIntent.getStringExtra("Categoria");
+        String imagenProducto = previousIntent.getStringExtra("Imagen");
 
-        btnListado.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),Listado.class);
-                startActivity(intent);
-            }
-        });
+        txtId.setText(idProducto);
+        txtnombre.setText(nombreProducto);
+        txtprecio.setText(precioProducto);
+        imageView.setImageBitmap(imageUtil.decodeFromBase64(imagenProducto));
 
 
     }
@@ -68,7 +77,7 @@ public class Productos extends AppCompatActivity {
         List<String> categorias = Arrays.asList("Tiramisú", "Cheesecake", "Flan", "Brownies","Panacota");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categorias);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        spcategoria.setAdapter(adapter);
     }
 
     private void seleccionarImagen() {
@@ -83,9 +92,9 @@ public class Productos extends AppCompatActivity {
             imagenUri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagenUri);
-                imagen.setImageBitmap(bitmap);
+                imageView.setImageBitmap(bitmap);
 
-                imagen.setVisibility(View.VISIBLE);
+                imageView.setVisibility(View.VISIBLE);
             } catch (IOException e) {
                 e.printStackTrace();
             }
