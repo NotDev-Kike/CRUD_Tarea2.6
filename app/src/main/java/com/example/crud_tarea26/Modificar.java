@@ -51,7 +51,7 @@ public class Modificar extends AppCompatActivity {
 
         llenarSpinner();
         llenarDatos();
-        // Me quede despierto contigo porque me enc
+
         imageView.setOnClickListener(v -> seleccionarImagen());
 
     }
