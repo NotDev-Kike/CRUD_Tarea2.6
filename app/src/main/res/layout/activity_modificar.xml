@@ -8,94 +8,81 @@
     android:layout_height="match_parent"
     android:background="@drawable/fondoapp"
     android:gravity="center"
-    android:orientation="vertical"
     android:padding="16dp"
     tools:context=".Modificar">
-
 
     <LinearLayout
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
-        <!-- Vista para mostrar la imagen seleccionada -->
         <ImageView
             android:id="@+id/imagen"
             android:layout_width="250dp"
             android:layout_height="250dp"
             android:src="@drawable/foto"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:contentDescription="Imagen del producto" />
 
-
-        <!-- Campo para el Nombre del Producto -->
         <EditText
             android:id="@+id/textIdM"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:hint="ID del producto"
             android:backgroundTint="@color/white"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:textSize="20sp"
             android:padding="18dp"
-            android:inputType="text"
-            android:hint="Id" />
+            android:inputType="number"
+            android:enabled="false" />
 
         <EditText
             android:id="@+id/txtnombre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:hint="Nombre del producto"
             android:backgroundTint="@color/white"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:textSize="20sp"
             android:padding="18dp"
-            android:inputType="text"
-            android:hint="Nombre del producto" />
+            android:inputType="text" />
 
-        <!-- Campo para el Precio del Producto -->
         <EditText
             android:id="@+id/txtprecio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:hint="Precio"
+            android:backgroundTint="@color/white"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:textSize="20sp"
             android:padding="18dp"
-            android:backgroundTint="@color/white"
             android:inputType="numberDecimal" />
 
-        <!-- Spinner para la categoría -->
         <Spinner
-
             android:id="@+id/spcategoria"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:padding="18dp"
             android:backgroundTint="@color/white"
-            android:popupBackground="#001a00"
+            android:popupBackground="#001a00" />
 
-            />
-
-        <!-- Botón para guardar -->
         <Button
             android:id="@+id/btnModificar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Modificar"
+            android:layout_marginTop="32dp"
             android:backgroundTint="@color/white"
             android:textColor="#001a00"
             android:padding="18dp"
-            android:layout_marginTop="32dp"
-            android:textSize="20sp"
-            />
+            android:textSize="20sp" />
 
     </LinearLayout>
 

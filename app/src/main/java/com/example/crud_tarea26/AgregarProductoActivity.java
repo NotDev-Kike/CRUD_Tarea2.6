@@ -29,35 +29,46 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class Modificar extends AppCompatActivity {
+public class AgregarProductoActivity extends AppCompatActivity {
 
-    private EditText txtnombre, txtprecio, txtId;
     private static final int IMAGE_REQUEST = 1;
-    private ImageView imageView;
-    private Spinner spcategoria;
-    private String imagen64;
-    private Button btnModificar;
 
-    private String apiKey, nombreUsuario, contrasena;
+    EditText txtNombre, txtPrecio;
+    Spinner spinner;
+    Button btnGuardar, btnListado;
+    ImageView imagen;
+    private Uri imagenUri;
+    private String imagen64;
 
     private ApiService apiService;
+    private String apiKey, nombreUsuario, contrasena;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_modificar);
+        setContentView(R.layout.activity_productos);
 
-        txtnombre = findViewById(R.id.txtnombre);
-        txtprecio = findViewById(R.id.txtprecio);
-        imageView = findViewById(R.id.imagen);
-        spcategoria = findViewById(R.id.spcategoria);
-        txtId = findViewById(R.id.textIdM);
-        btnModificar = findViewById(R.id.btnModificar);
+        txtNombre = findViewById(R.id.txtnombre);
+        txtPrecio = findViewById(R.id.txtprecio);
+        imagen = findViewById(R.id.imagen);
+        spinner = findViewById(R.id.spcategoria);
 
-        txtId.setEnabled(false);
+        btnGuardar = findViewById(R.id.btnguardar);
+        btnListado = findViewById(R.id.btnListado);
 
         llenarSpinner();
-        llenarDatos();
+
+        imagen.setOnClickListener(v -> seleccionarImagen());
+
+        btnGuardar.setOnClickListener(v -> guardarProducto());
+
+        btnListado.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), Listado.class);
+            intent.putExtra("apiKey", apiKey);
+            intent.putExtra("nombre", nombreUsuario);
+            intent.putExtra("contrasena", contrasena);
+            startActivity(intent);
+        });
 
         apiKey = getIntent().getStringExtra("apiKey");
         nombreUsuario = getIntent().getStringExtra("nombre");
@@ -65,40 +76,13 @@ public class Modificar extends AppCompatActivity {
 
         Retrofit retrofitAutenticado = RetrofitClient.getRetrofitClient(nombreUsuario, contrasena, apiKey);
         apiService = retrofitAutenticado.create(ApiService.class);
-
-        imageView.setOnClickListener(v -> seleccionarImagen());
-
-        btnModificar.setOnClickListener(v -> actualizarProducto());
-    }
-
-    private void llenarDatos() {
-        Intent previousIntent = getIntent();
-        String idProducto = previousIntent.getStringExtra("Id");
-        String nombreProducto = previousIntent.getStringExtra("Nombre");
-        String precioProducto = previousIntent.getStringExtra("Precio");
-        String categoriaProducto = previousIntent.getStringExtra("Categoria");
-        String imagenProducto = previousIntent.getStringExtra("Imagen");
-
-        txtId.setText(idProducto);
-        txtnombre.setText(nombreProducto);
-        txtprecio.setText(precioProducto);
-
-        int spinnerPosition = ((ArrayAdapter<String>) spcategoria.getAdapter()).getPosition(categoriaProducto);
-        spcategoria.setSelection(spinnerPosition);
-
-        imagen64 = imagenProducto;
-
-        Bitmap bitmap = imageUtil.decodeFromBase64(imagenProducto);
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-        }
     }
 
     private void llenarSpinner() {
         List<String> categorias = Arrays.asList("Tiramisú", "Cheesecake", "Flan", "Brownies", "Panacota");
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categorias);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spcategoria.setAdapter(adapter);
+        spinner.setAdapter(adapter);
     }
 
     private void seleccionarImagen() {
@@ -109,12 +93,12 @@ public class Modificar extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri imagenUri = data.getData();
+            imagenUri = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imagenUri);
-                imageView.setImageBitmap(bitmap);
+                imagen.setImageBitmap(bitmap);
+                imagen.setVisibility(View.VISIBLE);
                 imagen64 = imageUtil.encodeToBase64(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -123,14 +107,13 @@ public class Modificar extends AppCompatActivity {
         }
     }
 
-    private void actualizarProducto() {
-        String idStr = txtId.getText().toString();
-        String nombre = txtnombre.getText().toString();
-        String precioStr = txtprecio.getText().toString();
-        String categoria = spcategoria.getSelectedItem().toString();
+    private void guardarProducto() {
+        String nombre = txtNombre.getText().toString().trim();
+        String precioStr = txtPrecio.getText().toString().trim();
+        String categoria = spinner.getSelectedItem().toString();
 
-        if (nombre.isEmpty() || precioStr.isEmpty()) {
-            Toast.makeText(this, "Complete todos los campos", Toast.LENGTH_SHORT).show();
+        if (nombre.isEmpty() || precioStr.isEmpty() || imagen64 == null) {
+            Toast.makeText(this, "Complete todos los campos y seleccione una imagen", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -142,26 +125,36 @@ public class Modificar extends AppCompatActivity {
             return;
         }
 
-        int id = Integer.parseInt(idStr);
+        ProductoModel producto = new ProductoModel();
+        producto.setNombre(nombre);
+        producto.setPrecio(precio);
+        producto.setCategoria(categoria);
+        producto.setImagenProducto(imagen64);
 
-        ProductoModel producto = new ProductoModel(id, nombre, precio, categoria, imagen64);
-
-        Call<Void> call = apiService.actualizarProducto(producto);
+        Call<Void> call = apiService.crearProducto(producto);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(Modificar.this, "Producto actualizado correctamente", Toast.LENGTH_SHORT).show();
-                    finish();
+                    Toast.makeText(AgregarProductoActivity.this, "Producto guardado exitosamente", Toast.LENGTH_SHORT).show();
+                    limpiarCampos();
                 } else {
-                    Toast.makeText(Modificar.this, "Error al actualizar producto", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AgregarProductoActivity.this, "Error al guardar el producto", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(Modificar.this, "Error de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(AgregarProductoActivity.this, "Fallo la conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void limpiarCampos() {
+        txtNombre.setText("");
+        txtPrecio.setText("");
+        imagen.setImageResource(android.R.color.transparent);
+        imagen64 = null;
+        spinner.setSelection(0);
     }
 }

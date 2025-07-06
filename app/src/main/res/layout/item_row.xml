@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/fondolista"
-
-    >
+    android:layout_height="100dp"
+    android:padding="8dp"
+    android:background="@drawable/fondolista">
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
         android:id="@+id/imageView"
-        android:padding="10dp"
-        android:layout_alignParentLeft="true"/>
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:scaleType="centerCrop"
+        android:padding="4dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/textContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textId"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginTop="25dp"
-        android:layout_toRightOf="@id/imageView"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textNombre"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginTop="25dp"
-        android:layout_toRightOf="@+id/textId"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textPrecio"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginTop="25dp"
-        android:layout_toRightOf="@+id/textNombre"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textCategoria"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:padding="10dp"
-        android:layout_marginTop="25dp"
-        android:layout_toRightOf="@+id/textPrecio"/>
+        android:layout_toEndOf="@id/imageView"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textNombre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textCategoria"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textPrecio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+
 </RelativeLayout>
