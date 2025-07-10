@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.crud_tarea26.api.ApiService;
 import com.example.crud_tarea26.api.RetrofitClient;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,10 +56,15 @@ public class Registro extends AppCompatActivity {
             return;
         }
 
+        // Calcular ha1 = md5(usuario + ":" + realm + ":" + contraseña)
+        String realm = "API CRUD";
+        String ha1 = md5(nombre + ":" + realm + ":" + password);
+
         Map<String, String> datos = new HashMap<>();
         datos.put("nombre", nombre);
         datos.put("correo", correo);
         datos.put("contrasena", password);
+        datos.put("ha1", ha1);  // Enviar ha1 también al backend
 
         ApiService apiService = RetrofitClient.getApiService();
         Call<Void> call = apiService.registrarUsuario(datos);
@@ -67,7 +74,7 @@ public class Registro extends AppCompatActivity {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(Registro.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                    finish();
+                    finish(); // Cierra la actividad y regresa
                 } else {
                     Log.e(TAG, "Error en respuesta: " + response.code());
                     Toast.makeText(Registro.this, "Error al registrar: " + response.code(), Toast.LENGTH_SHORT).show();
@@ -80,5 +87,20 @@ public class Registro extends AppCompatActivity {
                 Toast.makeText(Registro.this, "Error de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private String md5(String texto) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] bytes = md.digest(texto.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, "Error al generar MD5", e);
+            return null;
+        }
     }
 }

@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,7 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.crud_tarea26.api.ApiService;
 import com.example.crud_tarea26.api.RetrofitClient;
+import com.example.crud_tarea26.imageUtil;
 import com.example.crud_tarea26.modelo.ProductoModel;
+import com.example.crud_tarea26.modelo.ProductoResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -57,7 +58,6 @@ public class Modificar extends AppCompatActivity {
         txtId.setEnabled(false);
 
         llenarSpinner();
-        llenarDatos();
 
         apiKey = getIntent().getStringExtra("apiKey");
         nombreUsuario = getIntent().getStringExtra("nombre");
@@ -66,32 +66,14 @@ public class Modificar extends AppCompatActivity {
         Retrofit retrofitAutenticado = RetrofitClient.getRetrofitClient(nombreUsuario, contrasena, apiKey);
         apiService = retrofitAutenticado.create(ApiService.class);
 
+        String idProducto = getIntent().getStringExtra("Id");
+        if (idProducto != null) {
+            cargarProductoDesdeAPI(idProducto);
+        }
+
         imageView.setOnClickListener(v -> seleccionarImagen());
 
         btnModificar.setOnClickListener(v -> actualizarProducto());
-    }
-
-    private void llenarDatos() {
-        Intent previousIntent = getIntent();
-        String idProducto = previousIntent.getStringExtra("Id");
-        String nombreProducto = previousIntent.getStringExtra("Nombre");
-        String precioProducto = previousIntent.getStringExtra("Precio");
-        String categoriaProducto = previousIntent.getStringExtra("Categoria");
-        String imagenProducto = previousIntent.getStringExtra("Imagen");
-
-        txtId.setText(idProducto);
-        txtnombre.setText(nombreProducto);
-        txtprecio.setText(precioProducto);
-
-        int spinnerPosition = ((ArrayAdapter<String>) spcategoria.getAdapter()).getPosition(categoriaProducto);
-        spcategoria.setSelection(spinnerPosition);
-
-        imagen64 = imagenProducto;
-
-        Bitmap bitmap = imageUtil.decodeFromBase64(imagenProducto);
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-        }
     }
 
     private void llenarSpinner() {
@@ -99,6 +81,45 @@ public class Modificar extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categorias);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spcategoria.setAdapter(adapter);
+    }
+
+    private void cargarProductoDesdeAPI(String idProducto) {
+        Call<ProductoResponse> call = apiService.getProductos(); // Idealmente deberías tener un endpoint getProductoPorId(id)
+
+        call.enqueue(new Callback<ProductoResponse>() {
+            @Override
+            public void onResponse(Call<ProductoResponse> call, Response<ProductoResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    for (ProductoModel producto : response.body().getData()) {
+                        if (String.valueOf(producto.getId()).equals(idProducto)) {
+                            txtId.setText(String.valueOf(producto.getId()));
+                            txtnombre.setText(producto.getNombre());
+                            txtprecio.setText(String.valueOf(producto.getPrecio()));
+
+                            int spinnerPosition = ((ArrayAdapter<String>) spcategoria.getAdapter())
+                                    .getPosition(producto.getCategoria());
+                            spcategoria.setSelection(spinnerPosition);
+
+                            imagen64 = producto.getImagenProducto();
+                            Bitmap bitmap = imageUtil.decodeFromBase64(imagen64);
+                            if (bitmap != null) {
+                                imageView.setImageBitmap(bitmap);
+                            } else {
+                                Toast.makeText(Modificar.this, "No se pudo cargar la imagen", Toast.LENGTH_SHORT).show();
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    Toast.makeText(Modificar.this, "Error al obtener producto", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProductoResponse> call, Throwable t) {
+                Toast.makeText(Modificar.this, "Error de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void seleccionarImagen() {
@@ -124,9 +145,9 @@ public class Modificar extends AppCompatActivity {
     }
 
     private void actualizarProducto() {
-        String idStr = txtId.getText().toString();
-        String nombre = txtnombre.getText().toString();
-        String precioStr = txtprecio.getText().toString();
+        String idStr = txtId.getText().toString().trim();
+        String nombre = txtnombre.getText().toString().trim();
+        String precioStr = txtprecio.getText().toString().trim();
         String categoria = spcategoria.getSelectedItem().toString();
 
         if (nombre.isEmpty() || precioStr.isEmpty()) {
@@ -135,14 +156,15 @@ public class Modificar extends AppCompatActivity {
         }
 
         double precio;
+        int id;
+
         try {
+            id = Integer.parseInt(idStr);
             precio = Double.parseDouble(precioStr);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Precio inválido", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "ID o Precio inválido", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        int id = Integer.parseInt(idStr);
 
         ProductoModel producto = new ProductoModel(id, nombre, precio, categoria, imagen64);
 
@@ -154,7 +176,7 @@ public class Modificar extends AppCompatActivity {
                     Toast.makeText(Modificar.this, "Producto actualizado correctamente", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(Modificar.this, "Error al actualizar producto", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Modificar.this, "Error al actualizar producto. Código: " + response.code(), Toast.LENGTH_LONG).show();
                 }
             }
 

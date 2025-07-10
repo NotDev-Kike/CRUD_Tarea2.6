@@ -1,10 +1,21 @@
 package com.example.crud_tarea26.modelo;
 
+import com.google.gson.annotations.SerializedName;
+
 public class ProductoModel {
+    @SerializedName("id")
     private int id;
+
+    @SerializedName("nombre")
     private String nombre;
+
+    @SerializedName("precio")
     private double precio;
+
+    @SerializedName("categoria")
     private String categoria;
+
+    @SerializedName("imagenProducto")
     private String imagenProducto;
 
     public ProductoModel() {

@@ -3,7 +3,6 @@ package com.example.crud_tarea26;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -17,9 +16,7 @@ import com.example.crud_tarea26.modelo.ProductoModel;
 import com.example.crud_tarea26.modelo.ProductoResponse;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -97,7 +94,7 @@ public class Listado extends AppCompatActivity {
             modificar.putExtra("Nombre", producto.getNombre());
             modificar.putExtra("Precio", String.valueOf(producto.getPrecio()));
             modificar.putExtra("Categoria", producto.getCategoria());
-            modificar.putExtra("Imagen", producto.getImagenProducto());
+            //modificar.putExtra("Imagen", producto.getImagenProducto());
             modificar.putExtra("apiKey", apiKey);
             modificar.putExtra("nombre", nombreUsuario);
             modificar.putExtra("contrasena", contrasena);
@@ -110,10 +107,7 @@ public class Listado extends AppCompatActivity {
     }
 
     private void eliminarProducto(int id) {
-        Map<String, Integer> idProducto = new HashMap<>();
-        idProducto.put("id", id);
-
-        Call<Void> call = apiService.eliminarProducto(idProducto);
+        Call<Void> call = apiService.eliminarProducto(id);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
